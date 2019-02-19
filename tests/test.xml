@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<!-- Converted from org-mode to XML by org-to-xml version 0.0.1 -->
+<!-- See https://github.com/ndw/org-to-xml -->
+<org-data><section><keyword key="TITLE" value="Some Title"/><keyword key="AUTHOR" value="Norman Walsh"/><keyword key="DATE" value="2019-02-19"/><paragraph>A paragraph with &lt;markup&gt; in it. This isn’t intended to be meaningful
+or useful.
+</paragraph></section><headline level="1" CUSTOM_ID="first" title="First level heading"><section><property-drawer><node-property key="CUSTOM_ID" value="first"/></property-drawer></section><headline level="2" todo-keyword="TODO" todo-type="todo" deadline="&lt;2019-02-26 Tue +1w&gt;" SRC="[[file:/projects/emacs/org-to-xml/README.md::For%20the%20curious,%20here%E2%80%99s%20how%20it%20works.]]" CREATED="[2019-02-19 Tue 06:39]" title="This is an example TODO item."><section><planning deadline="&lt;2019-02-26 Tue +1w&gt;"/><property-drawer><node-property key="CREATED" value="[2019-02-19 Tue 06:39]"/><node-property key="SRC" value="[[file:/projects/emacs/org-to-xml/README.md::For%20the%20curious,%20here%E2%80%99s%20how%20it%20works.]]"/></property-drawer><paragraph>See <link type="https" path="//orgmode.org/" format="bracket" raw-link="https://orgmode.org/">org-mode</link>for more information about <code value="org-mode"/>.
+</paragraph></section></headline></headline></org-data>

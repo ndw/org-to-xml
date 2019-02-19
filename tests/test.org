@@ -1,0 +1,20 @@
+#+TITLE: Some Title
+#+AUTHOR: Norman Walsh
+#+DATE: 2019-02-19
+
+A paragraph with <markup> in it. This isn’t intended to be meaningful
+or useful.
+
+* First level heading
+  :PROPERTIES:
+  :CUSTOM_ID: first
+  :END:
+
+** TODO This is an example TODO item.
+   DEADLINE: <2019-02-26 Tue +1w>
+   :PROPERTIES:
+   :CREATED:  [2019-02-19 Tue 06:39]
+   :SRC:      [[file:/projects/emacs/org-to-xml/README.md::For%20the%20curious,%20here%E2%80%99s%20how%20it%20works.]]
+   :END:
+
+See [[https://orgmode.org/][org-mode]] for more information about ~org-mode~.

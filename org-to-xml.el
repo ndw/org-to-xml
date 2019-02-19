@@ -41,6 +41,10 @@
 ;; I have 'org-to-xml bound to a key, but there's nothing remotely standard
 ;; about my binding.
 ;;
+;; Change log:
+;;
+;; v0.0.2: added default namespace
+;; v0.0.1: initial release
 
 ;;; Code:
 
@@ -58,7 +62,7 @@
       (ndw/o2xml--org-to-xml (current-buffer))
     (message "The org-to-xml function can only be applied to org-mode buffers")))
 
-(setq ndw/o2xml--org-to-xml-version "0.0.1")
+(setq ndw/o2xml--org-to-xml-version "0.0.2")
 
 (defun ndw/o2xml--org-to-xml (buffer &optional filename)
   "Convert the 'org-mode' BUFFER to XML, save the result in FILENAME. If no FILENAME
@@ -82,6 +86,9 @@ is given, the buffer filename will be used, with .org removed and .xml added."
       (insert "<!-- See https://github.com/ndw/org-to-xml -->\n")
       (ndw/o2xml--walk-tree tree)
       (goto-char (point-min))
+      ;; Slightly hacky approach to adding a default namespace
+      (if (re-search-forward "<org-data>")
+          (replace-match "<org-data xmlns=\"https://nwalsh.com/ns/org-to-xml\">"))
       (while (re-search-forward "<\\([-a-zA-Z]+\\)\\([^>]*\\)></\\1>" nil t)
         (replace-match "<\\1\\2/>"))
       (write-region (point-min) (point-max) xmlfn))

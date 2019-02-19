@@ -86,4 +86,4 @@ a keybinding in [[https://en.wikipedia.org/wiki/Emacs_Lisp][elisp]]. I expect th
 crude. Suggestions for improvement, or simply pointers to the bits of the
 [[https://www.gnu.org/software/emacs/manual/elisp.html][elisp manual]] I should read again, most humbly solicited.
 
-I also confess, I’m completely winging it current function naming/namspacing conventions.
+I also confess, I’m completely winging it on current function naming/namspacing conventions.

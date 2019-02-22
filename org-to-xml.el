@@ -3,7 +3,6 @@
 ;; Copyright © 2019 Norman Walsh
 
 ;; Author: Norman Walsh <ndw at nwalsh dot com>
-;; Version: 0.0.1
 ;; Keywords: org-mode, XML
 
 ;; This file is not part of GNU Emacs.
@@ -43,6 +42,12 @@
 ;;
 ;; Change log:
 ;;
+;; v0.0.3: many improvements
+;;         - move data out of @value and into content so whitespace won't be mangled
+;;         - strip leading whitespace paragraphs
+;;         - unindent src-block content so it's left aligned
+;;         - handle titles correctly
+;;         - etc. (0.0.2 wasn't really very good.)
 ;; v0.0.2: added default namespace
 ;; v0.0.1: initial release
 
@@ -51,22 +56,33 @@
 (require 'org)
 
 (defvar org-to-xml-ignore-symbols
-  '(:begin :end :parent :contents-begin :contents-end :pre-blank :post-blank :post-affiliated
-           :raw-value :structure))
+  '(:parent :begin :end
+            :contents-begin :contents-end
+            :pre-blank :post-blank
+            :post-affiliated :raw-value
+            :structure :value :title))
 
 (defun org-to-xml ()
   "Convert an 'org-mode' buffer to XML."
   (interactive)
-  (message (concat "major mode is " major-mode))
   (if (eq major-mode 'org-mode)
       (ndw/o2xml--org-to-xml (current-buffer))
     (message "The org-to-xml function can only be applied to org-mode buffers")))
 
-(setq ndw/o2xml--org-to-xml-version "0.0.2")
+(defvar ndw/o2xml--org-to-xml-version "0.0.3")
+(defvar ndw/o2xml--org-to-xml-uri "https://github.com/ndw/org-to-xml")
+
+(defun org-to-xml-version ()
+  "Displays the current version of org-to-xml."
+  (interactive)
+  (message (format "org-to-xml version %s (see %s)"
+                   ndw/o2xml--org-to-xml-version
+                   ndw/o2xml--org-to-xml-uri)))
 
 (defun ndw/o2xml--org-to-xml (buffer &optional filename)
-  "Convert the 'org-mode' BUFFER to XML, save the result in FILENAME. If no FILENAME
-is given, the buffer filename will be used, with .org removed and .xml added."
+  "Convert the 'org-mode' BUFFER to XML; save the result in FILENAME.
+If no FILENAME is given, the buffer filename will be used, with .org
+removed and .xml added."
   (let* ((buffn (buffer-file-name buffer))
          (xmlfn (if filename
                     filename
@@ -85,12 +101,7 @@ is given, the buffer filename will be used, with .org removed and .xml added."
       (insert " -->\n")
       (insert "<!-- See https://github.com/ndw/org-to-xml -->\n")
       (ndw/o2xml--walk-tree tree)
-      (goto-char (point-min))
-      ;; Slightly hacky approach to adding a default namespace
-      (if (re-search-forward "<org-data>")
-          (replace-match "<org-data xmlns=\"https://nwalsh.com/ns/org-to-xml\">"))
-      (while (re-search-forward "<\\([-a-zA-Z]+\\)\\([^>]*\\)></\\1>" nil t)
-        (replace-match "<\\1\\2/>"))
+      (ndw/o2xml--post-process)
       (write-region (point-min) (point-max) xmlfn))
     (message (concat "Converted org-mode: " xmlfn))))
 
@@ -105,25 +116,52 @@ is given, the buffer filename will be used, with .org removed and .xml added."
 (defun ndw/o2xml--walk-tree (tree)
   "Walk the 'org-mode' sexp TREE, inserting XML into the buffer for each expression."
   (if (listp tree)
-      (let ((tag   (car tree))
-            (attrs (if (listp tree) (cadr tree) nil))
-            (rest  (if (listp tree) (cddr tree) nil)))
+      (let* ((tag   (car tree))
+             (attrs (if (listp tree) (cadr tree) nil))
+             (rest  (if (listp tree) (cddr tree) nil))
+             (pre-blank (plist-get attrs :pre-blank))
+             (post-blank (plist-get attrs :post-blank))
+             (props (ndw/o2xml--property-drawer tree)))
         (progn
           (insert (format "<%s" tag))
-          (ndw/o2xml--walk-attributes attrs)
+          (ndw/o2xml--walk-attributes attrs props)
           (insert ">")
-          (mapcar 'ndw/o2xml--walk-tree rest)
-          (insert (format "</%s>" tag))))
-    (insert (ndw/o2xml--xml-content-escape (substring-no-properties tree 0 (length tree))))))
+          (if (plist-get attrs :title)
+              (progn
+                (insert "<title>")
+                (mapc
+                 (lambda (element)
+                   (ndw/o2xml--walk-tree element))
+                 (plist-get attrs :title))
+                (insert "</title>\n")))
+          (if (plist-get attrs :value)
+              (insert
+                (ndw/o2xml--xml-content-escape
+                 (plist-get attrs :value))))
+          (mapc 'ndw/o2xml--walk-tree rest)
+          (insert (format "</%s>" tag))
+          (if (and post-blank (> post-blank 0))
+              (insert (make-string post-blank ?\s)))
+          ))
+    (insert (ndw/o2xml--xml-content-escape
+             (substring-no-properties tree 0 (length tree))))))
 
-(defun ndw/o2xml--walk-attributes (xattrs)
-  "Walk the attribute list, XATTRS, outputing XML attributes as appropriate."
-  (let ((attrs (copy-sequence xattrs)))
+(defun ndw/o2xml--walk-attributes (xattrs props)
+  "Walk the attribute list, XATTRS, outputing XML attributes as appropriate.
+If PROPS is non-nil, it's assumed to be a list of node-property elements.
+If an attribute has the same name as a node property, it's elided from
+the attribute list."
+  (let ((attrs (copy-sequence xattrs))
+        (keys  (mapcar
+                (lambda (prop)
+                  (plist-get (cadr prop) :key))
+                props)))
     (while attrs
       (let* ((sym  (car attrs))
              (name (substring (symbol-name sym) 1))
              (val  (cadr attrs)))
-        (if (and val (not (member sym org-to-xml-ignore-symbols)))
+        (if (and val (not (member sym org-to-xml-ignore-symbols))
+                 (not (member name keys)))
             (progn
               (insert (format " %s=\"" name))
               (ndw/o2xml--format-attribute val)
@@ -158,6 +196,56 @@ is given, the buffer filename will be used, with .org removed and .xml added."
   (replace-regexp-in-string "<" "&lt;"
     (replace-regexp-in-string ">" "&gt;"
       (replace-regexp-in-string "&" "&amp;" str))))
+
+(defun ndw/o2xml--property-drawer (element)
+  "If ELEMENT is a headline, return its properties."
+  (if (eq (car element) 'headline)
+      (if (and (listp element) (eq (caaddr element) 'section))
+          (let ((section (caddr element)))
+            (if (and (listp section) (eq (caaddr section) 'property-drawer))
+                (cddr (caddr section)))))))
+
+(defun ndw/o2xml--post-process ()
+  ;; Slightly hacky approach to adding a default namespace
+  (goto-char (point-min))
+  (if (re-search-forward "<org-data>")
+      (replace-match "<org-data xmlns=\"https://nwalsh.com/ns/org-to-xml\">"))
+  ;; Replace elements with empty content with empty element tags
+  (goto-char (point-min))
+  (while (re-search-forward "<\\([-a-zA-Z]+\\)\\([^>]*\\)></\\1>" nil t)
+    (replace-match "<\\1\\2/>"))
+  ;; Remove leading whitespace from paragraphs
+  (goto-char (point-min))
+  (while (re-search-forward "<\\(paragraph[^>]*\\)>\\s-+" nil t)
+    (replace-match "<\\1>"))
+  (goto-char (point-min))
+  (ndw/o2xml--undent-src-blocks)
+)
+
+(defun ndw/o2xml--undent-src-blocks ()
+  "Search for all src-block elements and remove leading indentation."
+  (while (re-search-forward "<src-block[^>]+>" nil t)
+      (let ((start (point)))
+        (insert "\n")
+        (let ((min-spaces 99999) ; an absurd number
+              (end nil)
+              (more-lines t))
+          (while more-lines
+            (if (looking-at "^\\s-*$")
+                ;; blank lines don't count
+                nil
+              (if (looking-at "^\\(\\s-+\\)")
+                  (if (> min-spaces (length (match-string 1)))
+                      (setq min-spaces (length (match-string 1))))
+                (setq more-lines nil)))
+            (if more-lines
+                (forward-line)))
+          (setq end (point))
+          (if (and (looking-at "</src-block>") (> min-spaces 0))
+              (progn
+                (indent-rigidly (1+ start) end (- min-spaces))))
+          (goto-char start)
+          (delete-char 1)))))
 
 (provide 'org-to-xml)
 

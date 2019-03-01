@@ -42,6 +42,7 @@
 ;;
 ;; Change log:
 ;;
+;; v0.0.4: allow the caller to specify an alternate filename for the xml
 ;; v0.0.3: many improvements
 ;;         - move data out of @value and into content so whitespace won't be mangled
 ;;         - strip leading whitespace paragraphs
@@ -62,14 +63,16 @@
             :post-affiliated :raw-value
             :structure :value :title))
 
-(defun org-to-xml ()
-  "Convert an 'org-mode' buffer to XML."
+(defun org-to-xml (&optional filename)
+  "Convert an 'org-mode' buffer to XML.
+If FILENAME is provided, then that filename is used to store the document.
+Otherwise, the filename is derived from the name of the Org file."
   (interactive)
   (if (eq major-mode 'org-mode)
-      (ndw/o2xml--org-to-xml (current-buffer))
+      (ndw/o2xml--org-to-xml (current-buffer) filename)
     (message "The org-to-xml function can only be applied to org-mode buffers")))
 
-(defvar ndw/o2xml--org-to-xml-version "0.0.3")
+(defvar ndw/o2xml--org-to-xml-version "0.0.4")
 (defvar ndw/o2xml--org-to-xml-uri "https://github.com/ndw/org-to-xml")
 
 (defun org-to-xml-version ()

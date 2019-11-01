@@ -64,6 +64,13 @@
             :post-affiliated :raw-value
             :structure :value :title))
 
+;;; Preliminary functions not available in raw emacs
+(defun caaddr (x)
+  (car (car (cdr (cdr x)))))
+
+(defun caddr (x)
+  (car (cdr (cdr x))))
+
 ;;;###autoload
 (defun org-to-xml (&optional filename)
   "Convert an 'org-mode' buffer to XML.

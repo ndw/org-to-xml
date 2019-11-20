@@ -41,7 +41,7 @@
 ;; about my binding.
 ;;
 ;; Change log:
-;;
+;; v0.0.6: added conditional bindings for caaddr and caddr
 ;; v0.0.5: added autoload comments
 ;; v0.0.4: allow the caller to specify an alternate filename for the xml
 ;; v0.0.3: many improvements
@@ -222,7 +222,7 @@ the attribute list."
                 (cddr (caddr section)))))))
 
 (defun ndw/o2xml--post-process ()
-  ;; Slightly hacky approach to adding a default namespace
+  "Post process the result to add a namespace declaration. A bit of a hack, really."
   (goto-char (point-min))
   (if (re-search-forward "<org-data>")
       (replace-match "<org-data xmlns=\"https://nwalsh.com/ns/org-to-xml\">"))

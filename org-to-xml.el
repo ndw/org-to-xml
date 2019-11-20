@@ -64,6 +64,16 @@
             :post-affiliated :raw-value
             :structure :value :title))
 
+;;; Preliminary functions not available in raw emacs
+;;; https://github.com/ndw/org-to-xml/pull/2
+(if (not (fboundp 'caaddr))
+    (progn
+      (defun caaddr (x)
+        (car (car (cdr (cdr x)))))
+
+      (defun caddr (x)
+        (car (cdr (cdr x))))))
+
 ;;;###autoload
 (defun org-to-xml (&optional filename)
   "Convert an 'org-mode' buffer to XML.

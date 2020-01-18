@@ -22,6 +22,9 @@
 
 ;;; Commentary:
 
+;; This module has been superseded by `om-to-xml.el'. You almost
+;; certainly want that one. This version is moribund.
+
 ;; This file converts an org-mode file to XML. The goal of this conversion
 ;; is a complete and accurate translation of the internal org-mode
 ;; data structures to XML. Only a minimal effort is made to clean up the

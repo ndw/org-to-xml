@@ -1,17 +1,39 @@
 #+TITLE: org-to-xml
 #+STARTUP: showeverything
 
-This is a library to convert Emacs org-mode files to XML. The
-resulting XML isn’t especially pretty, but that’s not the goal. The
-goal is a complete and accurate translation of the internal ~org-mode~
-data structures to XML.
+This project now contains two libraries to convert Emacs org-mode
+files to XML: [[*om-to-xml][om-to-xml]] and [[*org-to-xml (obsolete)][org-to-xml]] (now obsolete).
 
-The assumption is that downstream XML processing tools can be used to
-transform it. I plan add a few XSLT examples to this repository.
+The goal is the same: a complete and accurate translation of the
+internal ~org-mode~ data structures to XML. This produces XML that isn’t
+especially pretty, but the assumption is that downstream XML
+processing tools can be used to transform it.
+
+* om-to-xml
+
+Development of [[*org-to-xml (obsolete)][org-to-xml]] stalled when I realized that I didn’t really
+have a solid understanding of the underlying Org data structures
+and what I really needed to write first was a library that provided a
+consistent API that I could use in the conversion. (This is not a
+criticism of the Org developers; there are still corners of Emacs lisp
+that I don’t understand very well.)
+
+Lo and behold! Nate Dwarshuis has written [[https://github.com/ndwarshuis/om.el][just such a library]]! The
+~om-to-xml~ library is a rewrite of my XML conversion on top of that
+library.
+
+It does a more complete and accurate job and has a few extensibility
+mechanisms that ~org-to-xml~ did not:
+
++ Whitespace handling
++ Attribute handling
++ Custom element processing
+
+** How it works
 
 For the curious, here’s how it works.
 
-Consider, [[file:tests/test.org][an org file]]:
+Consider, [[file:tests/simple.org][an org file]]:
 
    #+BEGIN_SRC org
    #+TITLE: Some Title
@@ -36,56 +58,100 @@ Consider, [[file:tests/test.org][an org file]]:
    See [[https://orgmode.org/][org-mode]] for more information about ~org-mode~.
    #+END_SRC
 
-1. First, it’s parsed by ~org-element-parse-buffer~, swaths of which I’ve elided:
+1. First, it’s parsed by ~om~, swaths of which I’ve elided:
     #+BEGIN_SRC elisp
-    (org-data nil (section (:begin 1 :end 146 :contents-begin 1
-    :contents-end 145 :post-blank 1 :post-affiliated 1 :parent #0)
-    (keyword (:key "TITLE" :value "Some Title" :begin 1 :end 21
-    :post-blank 0 :post-affiliated 1 :parent #1))
-    (keyword (:key "AUTHOR" :value "Norman Walsh" :begin 21 :end 44
-    :post-blank 0 :post-affiliated 21 :parent #1))
-    (keyword (:key "DATE" :value "2019-02-19" :begin 44 :end 64
-    :post-blank 1 :post-affiliated 44 :parent #1))
-    (paragraph (:begin 64 :end 145 :contents-begin 64 :contents-end 145
-    :post-blank 0 :post-affiliated 64 :parent #1) #("A paragraph with
-    <markup> in it. This isn’t intended to be meaningful or useful. " 0 81
-    (:parent #2))))
-    (headline (:raw-value "First level heading" :begin 146 :end 544
-    :pre-blank 0 :contents-begin 168 :contents-end 544 :level 1 :priority
-    …
+((keyword (:key "TITLE" :value "Some Title"))
+ (keyword (:key "AUTHOR" :value "Norman Walsh"))
+ (keyword (:key "DATE" :value "2019-02-19"))
+ (paragraph
+  (:parent (section (:post-affiliated 64) #1))
+  #("A paragraph with <markup> in it. This isn’t intended to be meaningful
+or useful.
+" 0 81 (:parent #1)))
+ (headline
+  (:raw-value "First level heading" :level 1 :CUSTOM_ID "first"
+   :title (#("First level heading" 0 19 (:parent #1))))
+ (section
+  (:parent #1)
+  (property-drawer
+   (:parent #2)
+   (node-property (:key "CUSTOM_ID" :value "first" :parent #3))))
+ (headline
+  (:raw-value "This is an example TODO item." :level 2
+   :todo-keyword #("TODO" 0 4 (fontified t face org-todo))
+   :todo-type todo
+   :deadline (timestamp
+              (:type active :raw-value "<2019-02-26 Tue +1w>"
+               :year-start 2019 :month-start 2 :day-start 26
+               :year-end 2019 :month-end 2 :day-end 26
+               :repeater-type cumulate :repeater-value 1
+               :repeater-unit week))
+   :SRC "[[file:/projects/emacs/org-to-xml/README.md::For%20the%20curious,%20here%E2%80%99s%20how%20it%20works.]]"
+   :CREATED "[2019-02-19 Tue 06:39]"
+   :title (#("This is an example TODO item." 0 29 (:parent #2)))
+   :parent #1)
+  (section
+   (:parent #2)
+   (planning
+    (:closed nil
+     :deadline (timestamp
+                (:type active :raw-value "<2019-02-26 Tue +1w>"
+                       :year-start 2019 :month-start 2 :day-start 26
+                       :year-end 2019 :month-end 2 :day-end 26
+                       :repeater-type cumulate :repeater-value 1
+                       :repeater-unit week)) :parent #3))
+   (property-drawer
+    (:parent #3)
+    (node-property (:key "CREATED" :value "[2019-02-19 Tue 06:39]" :parent #4))
+    (node-property (:key "SRC" :value "[[file:/projects/emacs/org-to-xml/README.md::For%20the%20curious,%20here%E2%80%99s%20how%20it%20works.]]" :parent #4)))
+   (paragraph
+    (:parent #3)
+    #("See " 0 4 (:parent #4))
     (link (:type "https" :path "//orgmode.org/" :format bracket
-    :raw-link "https://orgmode.org/" :application nil :search-option nil
-    :begin 470 :end 505 :contents-begin 494 :contents-end 502 :post-blank
-    1 :parent #4) #("org-mode" 0 8 (:parent #5))) #("for more information
-    about " 0 27 (:parent #4)) (code (:value "org-mode" :begin 532 :end
-    542 :post-blank 0 :parent #4)) #(". " 0 2 (:parent #4)))))
+           :raw-link "https://orgmode.org/" :parent #4)
+          #("org-mode" 0 8 (:parent #5)))
+    #("for more information about " 0 27 (:parent #4))
+    (code (:value "org-mode" :parent #4)) #(".
+" 0 2 (:parent #4)))))))
     #+END_SRC
-2. We setup a buffer to store the XML, then walk over this data structure
-   emiting XML elements for each sub-expression. The node properties become
-   attributes, except for the properties listed in ~org-to-xml-ignore-symbols~
-   or properties that come from a [[https://orgmode.org/manual/Properties-and-Columns.html#Properties-and-Columns][properties drawer]] which are ignored.
-3. Finally, we do a little post-processing cleanup on the XML:
-   + Replace occurrences of ~<tag …></tag>~ with ~<tag …/>~.
-   + Remove leading spaces from ~<paragraph>~ elements.
-   + Un-indent code blocks so that they begin on the left margin.
-   And then save the file, swaths of which I have also elided.
+2. A buffer is created to store the XML, and the om data is traversed
+   emiting XML elements for each node. The node properties become
+   attributes, except for ignored properties and properties that come
+   from a [[https://orgmode.org/manual/Properties-and-Columns.html#Properties-and-Columns][properties drawer]] which are always ignored.
+3. If a post-processing function has been provided, it is run.
+4. Save the file.
    #+BEGIN_SRC xml
-   <?xml version="1.0"?>
-   <!-- Converted from org-mode to XML by org-to-xml version 0.0.3 -->
-   <!-- See https://github.com/ndw/org-to-xml -->
-   <org-data xmlns="https://nwalsh.com/ns/org-to-xml"><section>
-   <keyword key="TITLE">Some Title</keyword>
-   <keyword key="AUTHOR">Norman Walsh</keyword>
-   <keyword key="DATE">2019-02-19</keyword>
-   <paragraph>A paragraph with &lt;markup&gt; in it. This isn’t
-   intended to be meaningful or useful.
-   </paragraph></section>
-   <headline level="1"><title>First level heading</title>
-   …
-   <link type="https" path="//orgmode.org/" format="bracket"
-   raw-link="https://orgmode.org/">org-mode</link> for more information
-   about <code>org-mode</code>.
-   </paragraph></section></headline></headline></org-data>
+<?xml version="1.0"?>
+<!-- Converted from org-mode to XML by om-to-xml version 0.0.1 -->
+<!-- See https://github.com/ndw/org-to-xml -->
+<document xmlns="https://nwalsh.com/ns/org-to-xml">
+<keyword key="TITLE" value="Some Title"/>
+<keyword key="AUTHOR" value="Norman Walsh"/>
+<keyword key="DATE" value="2019-02-19"/>
+
+<paragraph>A paragraph with &lt;markup&gt; in it. This isn’t intended to be meaningful
+or useful.
+</paragraph>
+<headline raw-value="First level heading" level="1"><title>First level heading</title>
+<section>
+<property-drawer>
+<node-property key="CUSTOM_ID" value="first"/>
+</property-drawer>
+</section>
+
+<headline raw-value="This is an example TODO item." level="2" todo-keyword="TODO" todo-type="todo" SRC="[[file:/projects/emacs/org-to-xml/README.md::For%20the%20curious,%20here%E2%80%99s%20how%20it%20works.]]" CREATED="[2019-02-19 Tue 06:39]"><deadline><timestamp type="active" raw-value="&lt;2019-02-26 Tue +1w&gt;" year-start="2019" month-start="2" day-start="26" year-end="2019" month-end="2" day-end="26" repeater-type="cumulate" repeater-value="1" repeater-unit="week"/></deadline><title>This is an example TODO item.</title>
+<section><planning/>
+<property-drawer>
+<node-property key="CREATED" value="[2019-02-19 Tue 06:39]"/>
+<node-property key="SRC" value="[[file:/projects/emacs/org-to-xml/README.md::For%20the%20curious,%20here%E2%80%99s%20how%20it%20works.]]"/>
+</property-drawer>
+
+<paragraph>See <link type="https" path="//orgmode.org/" format="bracket" raw-link="https://orgmode.org/">org-mode</link>
+for more information about <code value="org-mode"/>.
+</paragraph>
+</section>
+</headline>
+</headline></document>
    #+END_SRC
 
 It’s been twenty years since I tried to do anything much more interesting than
@@ -93,7 +159,17 @@ a keybinding in [[https://en.wikipedia.org/wiki/Emacs_Lisp][elisp]]. I expect th
 crude. Suggestions for improvement, or simply pointers to the bits of the
 [[https://www.gnu.org/software/emacs/manual/elisp.html][elisp manual]] I should read again, most humbly solicited.
 
-I also confess, I’m completely winging it on current function naming/namspacing conventions.
+I also confess, I’m completely winging it on current function
+naming/namspacing conventions.
+
+
+* org-to-xml (obsolete)
+
+This version is moribund. I’m leaving it in place in case anyone is
+using it, but you should use [[*om-to-xml][om-to-xml]] instead.
+
+This version attempts to parse the raw Org data structures and there
+are places where it doesn’t do an especially good job.
 
 * Pros and Cons
 
@@ -111,7 +187,7 @@ impossible to extract /everything/ with fidelity, even the things you
 /don’t/ know about.
 
 So this code attempts to do it the hard way. But I’m also lying when I
-say I want a /complete/ dump of the org structures. I wantg a dump of
+say I want a /complete/ dump of the org structures. I want a dump of
 the /meaningful/ structures. One person’s meaning is another person’s
 pointless cruft, however.
 
@@ -122,8 +198,8 @@ Examples of structures I don’t consider meaningful:
 + Leading blanks in code blocks.
 + Leading spaces in paragraphs.
 
-It’s likely that this list will grow as I learn more about the
-org-mode data strutures. Unless I give up on this project altogether,
-of course.
+It’s likely that this list will grow as I learn more about the Org
+data strutures. Unless I give up on this project altogether, of
+course.
 
 

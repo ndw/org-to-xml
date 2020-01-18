@@ -1,9 +1,51 @@
 <?xml version="1.0"?>
-<!-- Converted from org-mode to XML by org-to-xml version 0.0.3 -->
+<!-- Converted from org-mode to XML by om-to-xml version 0.0.1 -->
 <!-- See https://github.com/ndw/org-to-xml -->
-<org-data xmlns="https://nwalsh.com/ns/org-to-xml"><section><keyword key="TITLE">Some Title</keyword><keyword key="AUTHOR">Norman Walsh</keyword><keyword key="DATE">2019-02-19</keyword> <paragraph>A paragraph with &lt;markup&gt; in it. This isn’t intended to be meaningful
+<document xmlns="https://nwalsh.com/ns/org-to-xml">
+<keyword key="TITLE" value="Some Title"/>
+<keyword key="AUTHOR" value="Norman Walsh"/>
+<keyword key="STARTUP" value="showeverything"/>
+<keyword key="DATE" value="2019-02-19"/>
+
+<paragraph>A paragraph with &lt;markup&gt; in it. This isn’t intended to be meaningful
 or useful.
-</paragraph></section> <headline level="1"><title>First level heading</title>
-<section><property-drawer><node-property key="CUSTOM_ID">first</node-property></property-drawer></section> <headline level="2" todo-keyword="TODO" todo-type="todo" deadline="&lt;2019-02-26 Tue +1w&gt;" SRC="[[file:/projects/emacs/org-to-xml/README.md::For%20the%20curious,%20here%E2%80%99s%20how%20it%20works.]]" CREATED="[2019-02-19 Tue 06:39]"><title>This is an example TODO item.</title>
-<section><planning deadline="&lt;2019-02-26 Tue +1w&gt;"/><property-drawer><node-property key="CREATED">[2019-02-19 Tue 06:39]</node-property><node-property key="SRC">[[file:/projects/emacs/org-to-xml/README.md::For%20the%20curious,%20here%E2%80%99s%20how%20it%20works.]]</node-property></property-drawer> <paragraph>See <link type="https" path="//orgmode.org/" format="bracket" raw-link="https://orgmode.org/">org-mode</link> for more information about <code>org-mode</code>.
-</paragraph></section></headline></headline></org-data>
+</paragraph>
+
+<paragraph>This document was written by <macro key="author" value="author"/>
+on <macro key="date" value="date"/>.
+</paragraph>
+
+<paragraph>Link to <link type="https" path="//so.nwalsh.com/" format="bracket" raw-link="https://so.nwalsh.com/"/>. Link to <link type="https" path="//en.wikipedia.org/" format="bracket" raw-link="https://en.wikipedia.org/">Wikipedia</link>. Internal link, see <link type="fuzzy" path="*For more information" format="bracket" raw-link="*For more information">for more information</link>.
+</paragraph>
+<headline raw-value="First level heading" level="1"><title>First level heading</title>
+<section>
+<property-drawer>
+<node-property key="CUSTOM_ID" value="first"/>
+<node-property key="FOO" value="Some &quot;kind&quot; of 'string' &amp; &lt;stuff&gt;."/>
+</property-drawer>
+</section>
+
+<headline raw-value="This is an example TODO item." level="2" todo-keyword="TODO" todo-type="todo" SRC="[[file:/projects/emacs/org-to-xml/README.md::For%20the%20curious,%20here%E2%80%99s%20how%20it%20works.]]" CREATED="[2019-02-19 Tue 06:39]"><deadline><timestamp type="active" raw-value="&lt;2020-02-26 Wed +1w&gt;" year-start="2020" month-start="2" day-start="26" year-end="2020" month-end="2" day-end="26" repeater-type="cumulate" repeater-value="1" repeater-unit="week"/></deadline><title>This is an example TODO item.</title>
+<section><planning/>
+<property-drawer>
+<node-property key="CREATED" value="[2019-02-19 Tue 06:39]"/>
+<node-property key="SRC" value="[[file:/projects/emacs/org-to-xml/README.md::For%20the%20curious,%20here%E2%80%99s%20how%20it%20works.]]"/>
+</property-drawer>
+</section>
+
+</headline>
+</headline>
+
+<headline raw-value="Here be code" level="1"><title>Here be code</title>
+<section><src-block language="emacs-lisp" retain-labels="t" use-labels="t">(+ 3 4)</src-block>
+</section>
+
+</headline>
+
+<headline raw-value="For more information" level="1"><title>For more information</title>
+<section>
+<paragraph>See <link type="https" path="//orgmode.org/" format="bracket" raw-link="https://orgmode.org/">org-mode</link>
+for more information about <code value="org-mode"/>.
+</paragraph>
+</section>
+</headline></document>

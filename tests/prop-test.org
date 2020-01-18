@@ -1,0 +1,10 @@
+#+TITLE: Property drawer test
+
+* Heading
+:PROPERTIES:
+:ID: foo
+:other: bar
+:END:
+
+This is some content.
+

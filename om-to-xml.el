@@ -336,11 +336,17 @@ directly."
    (t
     (insert (om-to-xml--om-xml-content-escape elem)))))
 
-(defun om-to-xml--om-xml-content-escape (str)
+(defun om-to-xml--om-xml-content-escape (value)
   "Escape the STR value appropriately for XML content."
-  (replace-regexp-in-string "<" "&lt;"
-    (replace-regexp-in-string ">" "&gt;"
-      (replace-regexp-in-string "&" "&amp;" str))))
+  (let ((str
+         (cond
+          ((integerp value)
+           (number-to-string value))
+          (t
+           value))))
+    (replace-regexp-in-string "<" "&lt;"
+      (replace-regexp-in-string ">" "&gt;"
+        (replace-regexp-in-string "&" "&amp;" str)))))
 
 (defun ndw/o2xml--om-xml-attribute-escape (str)
   "Escape the STR value appropriately for an XML attribute."

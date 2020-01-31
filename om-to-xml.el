@@ -315,7 +315,7 @@ value in the content of the element."
 
     (let ((value (plist-get plist :value)))
       (insert ">")
-      (insert (substring value 0 (1- (length value))))
+      (insert (om-to-xml--om-xml-content-escape (substring value 0 (1- (length value)))))
       (insert "</src-block>"))))
 
 (defun om-to-xml--om-element-to-xml (elem)

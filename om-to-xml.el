@@ -193,6 +193,7 @@ If no FILENAME is given, the buffer filename will be used, with
         (set-buffer buffer))
     (save-excursion
       (let ((om-point (point-min))
+            (last-point -1)
             (om-list '())
             (elem nil))
         (while (< om-point (point-max))
@@ -200,13 +201,15 @@ If no FILENAME is given, the buffer filename will be used, with
           (setq parent (plist-get (cadr elem) :parent))
           (setq om-point (plist-get (cadr elem) :end))
           (setq om-list (append om-list (list elem)))
-          ;; In an org file that has paragraphs before the first
-          ;; headline, the :end of the paragraph is just a little shy
-          ;; of the end of the section and 'om gets "stuck".
-          (if (and (eq (car elem) 'paragraph)
-                   (eq (car parent) 'section)
-                   (eq (plist-get (cadr parent) :end) (1+ om-point)))
-              (setq om-point (plist-get (cadr parent) :end)))
+          ;; There are places where parsing seems to get stuck.
+          ;; For example, if a paragraph precedes the first heading
+          ;; or if the file ends with several blank lines. The
+          ;; :end doesn't advance the cursor position and this
+          ;; while loop never ends. To avoid that, we use last-point
+          ;; to force the cursor to advance.
+          (if (<= om-point last-point)
+              (setq om-point (1+ last-point)))
+          (setq last-point om-point)
           (goto-char om-point))
         om-list))))
 

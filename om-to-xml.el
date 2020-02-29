@@ -299,7 +299,7 @@ because that's how they appear in the headline plist."
          (pblank (plist-get plist :post-blank))
          (blank (and (integerp pblank) (> pblank 0))))
     (if blank
-        (insert "\n"))))
+        (insert " "))))
   
 (defun om-to-xml--om-src-block-to-xml (elem)
   "Convert src-block ELEM to XML.
@@ -332,12 +332,15 @@ directly."
         (om-to-xml--om-base-element-to-xml elem))
       (om-to-xml--om-insert-blank elem)))
    ((listp elem)
-    (om-to-xml--om-element-to-xml (car elem)))
+    (let ((children elem))
+      (while children
+        (om-to-xml--om-element-to-xml (car children))
+        (setq children (cdr children)))))
    (t
     (insert (om-to-xml--om-xml-content-escape elem)))))
 
 (defun om-to-xml--om-xml-content-escape (value)
-  "Escape the STR value appropriately for XML content."
+  "Escape the string VALUE appropriately for XML content."
   (let ((str
          (cond
           ((integerp value)

@@ -200,15 +200,16 @@ If no FILENAME is given, the buffer filename will be used, with
           (setq elem (om-parse-element-at om-point))
           (setq parent (plist-get (cadr elem) :parent))
           (setq om-point (plist-get (cadr elem) :end))
-          (setq om-list (append om-list (list elem)))
           ;; There are places where parsing seems to get stuck.
           ;; For example, if a paragraph precedes the first heading
           ;; or if the file ends with several blank lines. The
           ;; :end doesn't advance the cursor position and this
           ;; while loop never ends. To avoid that, we use last-point
           ;; to force the cursor to advance.
+          ;; https://github.com/ndwarshuis/om.el/issues/8
           (if (<= om-point last-point)
-              (setq om-point (1+ last-point)))
+              (setq om-point (1+ last-point))
+            (setq om-list (append om-list (list elem))))
           (setq last-point om-point)
           (goto-char om-point))
         om-list))))

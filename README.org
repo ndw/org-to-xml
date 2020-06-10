@@ -1,22 +1,22 @@
 #+TITLE: org-to-xml
 #+STARTUP: showeverything
 
-This project now contains two libraries to convert Emacs org-mode
-files to XML: [[*om-to-xml][om-to-xml]] and [[*org-to-xml (obsolete)][org-to-xml]] (now obsolete).
+This project contains a library to convert Emacs org-mode files to
+XML: [[*om-to-xml][om-to-xml]].
 
-The goal is the same: a complete and accurate translation of the
-internal ~org-mode~ data structures to XML. This produces XML that isn’t
+The goal is a complete and accurate translation of the internal
+~org-mode~ data structures to XML. This produces XML that isn’t
 especially pretty, but the assumption is that downstream XML
 processing tools can be used to transform it.
 
 * om-to-xml
 
-Development of [[*org-to-xml (obsolete)][org-to-xml]] stalled when I realized that I didn’t really
-have a solid understanding of the underlying Org data structures
-and what I really needed to write first was a library that provided a
-consistent API that I could use in the conversion. (This is not a
-criticism of the Org developers; there are still corners of Emacs lisp
-that I don’t understand very well.)
+This projects started began with [[*org-to-xml (obsolete)][org-to-xml]], but development stalled
+when I realized that I didn’t really have a solid understanding of the
+underlying Org data structures and what I really needed to write first
+was a library that provided a consistent API that I could use in the
+conversion. (This is not a criticism of the Org developers; there are
+still corners of Emacs lisp that I don’t understand very well.)
 
 Lo and behold! Nate Dwarshuis has written [[https://github.com/ndwarshuis/om.el][just such a library]]! The
 ~om-to-xml~ library is a rewrite of my XML conversion on top of that
@@ -28,6 +28,15 @@ mechanisms that ~org-to-xml~ did not:
 + Whitespace handling
 + Attribute handling
 + Custom element processing
+
+** How to use it
+
+Install the library somewhere. I use [[https://github.com/raxod502/straight.el][straight.el]], but you can just
+download the library and put it on your load path any way you like.
+
+Run ~m-x om-to-xml~ in a buffer where you’re viewing an Org mode file.
+An XML representation will be constructed and saved. If the Org mode
+file is ~notes.org~, the XML file will be saved in ~notes.xml~.
 
 ** How it works
 
@@ -163,14 +172,6 @@ I also confess, I’m completely winging it on current function
 naming/namspacing conventions.
 
 
-* org-to-xml (obsolete)
-
-This version is moribund. I’m leaving it in place in case anyone is
-using it, but you should use [[*om-to-xml][om-to-xml]] instead.
-
-This version attempts to parse the raw Org data structures and there
-are places where it doesn’t do an especially good job.
-
 * Pros and Cons
 
 There are two obvious ways to approach the problem of converting .org files to .xml.
@@ -202,4 +203,9 @@ It’s likely that this list will grow as I learn more about the Org
 data strutures. Unless I give up on this project altogether, of
 course.
 
+* org-to-xml (obsolete)
 
+You can still find ~org-to-xml.el~ in this repository’s history (at tag
+[[https://github.com/ndw/org-to-xml/tree/0.0.5][0.0.5]], for example). I’ve removed it from the master branch because I
+really think it’s a dead end and it caused confusion for at least some
+users.

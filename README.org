@@ -1,8 +1,6 @@
 #+TITLE: org-to-xml
 #+STARTUP: showeverything
 
-[NOTE: On 4 August 2020, the default branch was renamed to ~main~.]
-
 This project contains a library to convert Emacs org-mode files to
 XML: [[*om-to-xml][om-to-xml]].
 
@@ -10,6 +8,12 @@ The goal is a complete and accurate translation of the internal
 ~org-mode~ data structures to XML. This produces XML that isn’t
 especially pretty, but the assumption is that downstream XML
 processing tools can be used to transform it.
+
+* What’s new?
+
+** 04 August 2020
+   + Renamed default branch to ~main~.
+   + Updated dependency (the ~om.el~ package was renamed ~org-ml~)
 
 * om-to-xml
 

@@ -3,7 +3,7 @@
 ;; Copyright © 2020 Norman Walsh
 
 ;; Author: Norman Walsh <ndw at nwalsh dot com>
-;; Keywords: org-mode, om, XML
+;; Keywords: org-mode, org-ml, XML
 
 ;; This file is not part of GNU Emacs.
 
@@ -22,16 +22,16 @@
 
 ;;; Prerequisites:
 
-;; om: https://github.com/ndwarshuis/om.el
+;; org-ml: https://github.com/ndwarshuis/org-ml
 
 ;;; Commentary:
 
 ;; This file converts an org-mode file to XML. It is a significant
-;; improvement over `org-to-xml.el`, also part of this package, in
-;; that it uses the excellent `om` library by Nate Dwarshuis to parse
-;; the Org data structures. I more-or-less abandoned attempting to
-;; improve `org-to-xml.el` at the point where I realized I needed a
-;; better parsing library for Org.
+;; improvement over `org-to-xml.el`, previously package, in that it
+;; uses the excellent `org-ml` library by Nate Dwarshuis to parse the
+;; Org data structures. I more-or-less abandoned attempting to improve
+;; `org-to-xml.el` at the point where I realized I needed a better
+;; parsing library for Org.
 
 ;; In addition to better parsing, `om-to-xml.el` provides a few
 ;; extensibility options:
@@ -85,14 +85,16 @@
 ;; standard about my binding.
 ;;
 ;; Change log:
-;; v0.0.1: initial release
+;; v0.0.7: Updated to use org-ml (the om.el refactored)
+;; ...
+;; v0.0.1: Initial release
 
 ;;; Code:
 
 (require 'org)
-(require 'om)
+(require 'org-ml)
 
-(defconst om-to-xml--om-to-xml-version "0.0.1")
+(defconst om-to-xml--om-to-xml-version "0.0.7")
 (defconst om-to-xml--om-to-xml-uri "https://github.com/ndw/org-to-xml")
 (defconst om-to-xml--namespace "https://nwalsh.com/ns/org-to-xml")
 
@@ -197,7 +199,7 @@ If no FILENAME is given, the buffer filename will be used, with
             (om-list '())
             (elem nil))
         (while (< om-point (point-max))
-          (setq elem (om-parse-element-at om-point))
+          (setq elem (org-ml-parse-element-at om-point))
           (setq parent (plist-get (cadr elem) :parent))
           (setq om-point (plist-get (cadr elem) :end))
           ;; There are places where parsing seems to get stuck.
@@ -206,7 +208,7 @@ If no FILENAME is given, the buffer filename will be used, with
           ;; :end doesn't advance the cursor position and this
           ;; while loop never ends. To avoid that, we use last-point
           ;; to force the cursor to advance.
-          ;; https://github.com/ndwarshuis/om.el/issues/8
+          ;; https://github.com/ndwarshuis/org-ml/issues/8
           (if (<= om-point last-point)
               (setq om-point (1+ last-point))
             (setq om-list (append om-list (list elem))))

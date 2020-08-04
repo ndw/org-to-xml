@@ -9,6 +9,12 @@ The goal is a complete and accurate translation of the internal
 especially pretty, but the assumption is that downstream XML
 processing tools can be used to transform it.
 
+* What’s new?
+
+** 04 August 2020
+   + Renamed default branch to ~main~.
+   + Updated dependency (the ~om.el~ package was renamed ~org-ml~)
+
 * om-to-xml
 
 This projects started began with [[*org-to-xml (obsolete)][org-to-xml]], but development stalled

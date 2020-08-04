@@ -85,7 +85,8 @@
 ;; standard about my binding.
 ;;
 ;; Change log:
-;; v0.0.2: Updated to use org-ml (the om.el refactored)
+;; v0.0.7: Updated to use org-ml (the om.el refactored)
+;; ...
 ;; v0.0.1: Initial release
 
 ;;; Code:
@@ -93,7 +94,7 @@
 (require 'org)
 (require 'org-ml)
 
-(defconst om-to-xml--om-to-xml-version "0.0.2")
+(defconst om-to-xml--om-to-xml-version "0.0.7")
 (defconst om-to-xml--om-to-xml-uri "https://github.com/ndw/org-to-xml")
 (defconst om-to-xml--namespace "https://nwalsh.com/ns/org-to-xml")
 
